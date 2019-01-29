@@ -8,6 +8,7 @@ import de.rpr.mycity.domain.city.entity.CityEntity
 import de.rpr.mycity.domain.city.repository.CityRepository
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
+import java.util.concurrent.TimeoutException
 import javax.transaction.Transactional
 
 @Service
@@ -17,7 +18,7 @@ internal class JpaCityService(val cityRepo: CityRepository, val log: Logger) : C
     override fun retrieveCity(cityId: String): CityDto? {
         log.debug("Retrieving city: {}", cityId)
 
-        return cityRepo.findOne(cityId)?.toDto()
+        return cityRepo.findById(cityId).orElse(null)?.toDto()
     }
 
     override fun retrieveCities(): List<CityDto> {
@@ -29,7 +30,9 @@ internal class JpaCityService(val cityRepo: CityRepository, val log: Logger) : C
     override fun updateCity(id: String, city: UpdateCityDto): CityDto? {
         log.debug("Updating city: {} with data: {}", id, city)
 
-        val currentCity = cityRepo.findOne(id)
+        throw TimeoutException()
+
+        val currentCity = cityRepo.findById(id).get()
         return if (currentCity != null) cityRepo.save(CityEntity.fromDto(city, currentCity)).toDto()
         else null
     }
